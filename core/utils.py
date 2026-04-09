@@ -8,10 +8,17 @@ def smooth_data(data: np.ndarray, kernel_size: int) -> np.ndarray:
 
     return smooth
 
-def calculate_gradient(smooth_data: np.ndarray):
-    gradient = np.gradient()
+def calculate_gradient(smooth_data: np.ndarray) -> np.ndarray:
+    gradient = np.gradient(smooth_data)
+    
+    return gradient
 
 
 if __name__ == "__main__":
-    zeros = np.zeros(4)
-    print(zeros)
+    zeros = np.zeros(25)
+    numbers = np.arange(100,256)
+    data = np.concatenate([zeros, numbers])
+    smooth_data = smooth_data(data=data, kernel_size=13)
+    gradient_data = calculate_gradient(smooth_data)
+
+    print(gradient_data)
