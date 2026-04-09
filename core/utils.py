@@ -13,12 +13,32 @@ def calculate_gradient(smooth_data: np.ndarray) -> np.ndarray:
     
     return gradient
 
+def find_edge(gradient: np.ndarray, x_min: int, x_max: int, edge_type: str): 
+    x_min = max(0, int(x_min))
+    x_max = min(len(gradient) - 1, int(x_max))
+    segment = gradient[x_min:x_max + 1]
+
+    if edge_type == "left":
+        idx_local = np.argmax(segment)
+    else:
+        idx_local = np.argmin(segment)
+    
+    x = x_min + idx_local
+    strength = abs(segment[idx_local])
+
+    return x, strength
+
+def measure_width(data: np.ndarray, kernel_size: int, l_min: int, l_max: int, r_min: int, r_max: int) -> float:
+    smooth_profile = smooth_data(data=data, kernel_size=kernel_size)
+    gradient_data = calculate_gradient(smooth_profile)
+    right_x, right_str = find_edge(gradient=gradient_data, x_min=r_min, x_max=r_max, edge_type="right")
+    left_x, left_str= find_edge(gradient=gradient_data, x_min=l_min, x_max=l_max, edge_type="left")
+
+    return float(right_x - left_x)
 
 if __name__ == "__main__":
     zeros = np.zeros(25)
-    numbers = np.arange(100,256)
-    data = np.concatenate([zeros, numbers])
-    smooth_data = smooth_data(data=data, kernel_size=13)
-    gradient_data = calculate_gradient(smooth_data)
-
-    print(gradient_data)
+    numbers_up = np.arange(100,256)
+    numbers_down = np.arange(255, 99, -1)
+    data = np.concatenate([zeros, numbers_up, numbers_down, zeros])
+    print(measure_width(data=data, kernel_size=13, l_min=0, l_max=180, r_min=181, r_max=362))
