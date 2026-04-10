@@ -28,13 +28,13 @@ def find_edge(gradient: np.ndarray, x_min: int, x_max: int, edge_type: str):
 
     return x, strength
 
-def measure_width(data: np.ndarray, kernel_size: int, l_min: int, l_max: int, r_min: int, r_max: int) -> float:
+def measure_width(data: np.ndarray, kernel_size: int, l_min: int, l_max: int, r_min: int, r_max: int):
     smooth_profile = smooth_data(data=data, kernel_size=kernel_size)
     gradient_data = calculate_gradient(smooth_profile)
     right_x, right_str = find_edge(gradient=gradient_data, x_min=r_min, x_max=r_max, edge_type="right")
     left_x, left_str= find_edge(gradient=gradient_data, x_min=l_min, x_max=l_max, edge_type="left")
 
-    return float(right_x - left_x)
+    return float(right_x - left_x), int(left_x), int(right_x)
 
 if __name__ == "__main__":
     zeros = np.zeros(25)
