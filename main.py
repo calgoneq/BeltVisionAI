@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 
 from core.utils import measure_width
 
@@ -7,27 +8,37 @@ if __name__ == "__main__":
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     height, width = gray_image.shape
-    row = height // 2
-    line_data = gray_image[row, :]
     scaled_width = width/100
 
-    red = (0, 0, 255)
+    blue = (255, 0, 0)
     green = (0, 255, 0)
-    cv2.line(image, (int(scaled_width), row), (int(scaled_width*100), row), red, 3)
+    red = (0, 0, 255)
+    purple = (116, 20, 73)
+    orange = (21, 71, 229)
+
+    colors = [blue, green, red, purple, orange]
+
+    positions = [0.2, 0.35, 0.5, 0.65, 0.8]
+    belt_widths = []
 
     l_min = round(scaled_width*10)
     l_max = round(scaled_width*50)
     r_min = round(scaled_width*60)
     r_max = round(scaled_width*90)
 
-    belt_width, left_x, right_x = measure_width(line_data, kernel_size=13, l_min=l_min, l_max=l_max, r_min=r_min, r_max=r_max)
+    for i, v in enumerate(positions):
+        position = int(height * v)
+        line_data = gray_image[position, :]
+        belt_width, left_x, right_x = measure_width(line_data, kernel_size=13, l_min=l_min, l_max=l_max, r_min=r_min, r_max=r_max)
+        belt_widths.append(belt_width)
+        cv2.line(image, (int(scaled_width), position), (int(scaled_width*100), position), colors[i], 3)
+        cv2.circle(image, (left_x, position), 10, colors[i], 3)
+        cv2.circle(image, (right_x, position), 10, colors[i], 3)
+        cv2.imwrite(f"result_{i}.jpg", image)
 
-    cv2.circle(image, (left_x, row), 10, green, 3)
-    cv2.circle(image, (right_x, row), 10, green, 3)
-    cv2.putText(image, f"Width: {belt_width} px", (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, red, 2)
+    avg_width = np.mean(belt_widths)
+    avg_stability = np.std(belt_widths)
+    cv2.putText(gray_image, f"avg_width: {avg_width} px", (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, colors[2], 2)
+    cv2.putText(gray_image, f"avg_stability: {avg_stability:.2f}", (0, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, colors[2], 2)
 
-    cv2.imshow("Belt", image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-    cv2.imwrite("result.jpg", image)
+    cv2.imwrite(f"result_all.png", gray_image)
