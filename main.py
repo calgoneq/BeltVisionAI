@@ -2,9 +2,13 @@ import cv2
 import numpy as np
 
 from core.utils import measure_width
+from core.ai import detect_defects
 
 if __name__ == "__main__":
-    image = cv2.imread("test_belt.jpg")
+    image_path="sample_seams.jpg"
+    model_path="best.pt"
+
+    image = cv2.imread(image_path)
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     height, width = gray_image.shape
@@ -35,6 +39,21 @@ if __name__ == "__main__":
         cv2.circle(image, (left_x, position), 10, colors[i], 3)
         cv2.circle(image, (right_x, position), 10, colors[i], 3)
         cv2.imwrite(f"result_{i}.jpg", image)
+
+    detection = detect_defects(image_path=image_path, model_path=model_path)
+
+    for det in detection:
+        x1 = int(det['box'][0])
+        y1 = int(det['box'][1])
+        x2 = int(det['box'][2])
+        y2 = int(det['box'][3])
+        
+        conf = det['confidence']
+
+        cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
+        cv2.putText(image, f"confidence: {conf:.2f}", (0, 75), cv2.FONT_HERSHEY_SIMPLEX, 1, colors[2], 2)
+    
+    cv2.imwrite(f"detection_result.jpg", image)
 
     avg_width = np.mean(belt_widths)
     avg_stability = np.std(belt_widths)
