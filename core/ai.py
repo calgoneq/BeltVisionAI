@@ -1,9 +1,12 @@
 from ultralytics import YOLO
 
-def detect_defects(image_path: str, model_path: str) -> list:
+from core.config import DEFAULT_CONF
+from core.logger_config import logger
+
+def detect_defects(image_path: str, model_path: str) -> list[dict]:
     model = YOLO(model_path)
     image = image_path
-    results = model(image, conf=0.05)
+    results = model(image, conf=DEFAULT_CONF)
     all_detections = []
 
     try: 
@@ -17,9 +20,6 @@ def detect_defects(image_path: str, model_path: str) -> list:
                 all_detections.append(data)
 
     except ValueError as e:
-        print(f"Error: {e}") 
+        logger.error(f"Error: {e}") 
 
     return all_detections
-
-if __name__ == "__main__":
-    print(detect_defects())
